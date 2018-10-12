@@ -16,17 +16,24 @@ class CaffeineApp(rumps.App):
                 print(e)
         else:
             try:
-                proc = getattr(self, "caffeine_proc", None)
-                if proc:
-                    proc.kill()
+                if self.caffeine_proc:
+                    self.caffeine_proc.kill()
+                    self.caffeine_pro = None
                 sender.state = not sender.state
             except Exception as e:
                 print(e)
         self.title = "📺🔒" if sender.state else "📺🔓"
 
+    @rumps.clicked("exit")
+    def quit(self, sender):
+        if isinstance(self.caffeine_proc, subprocess.Popen):
+            self.caffeine_proc.kill()
+        rumps.quit_application(sender)
+
+    def __init__(self, *args, **kwargs):
+        super(CaffeineApp, self).__init__(*args, **kwargs)
+        self.quit_button = None
+        self.caffeine_proc = None
+
 if __name__ == "__main__":
-    app = CaffeineApp("📺🔓")
-    app.run()
-    proc = getattr(app, "caffeine_proc", None)
-    if proc:
-        proc.kill()
+    CaffeineApp("📺🔓").run()
